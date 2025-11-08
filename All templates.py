@@ -206,56 +206,6 @@ class DSU:
             groups[self.find(i)].append(i)
         return groups
 
-'''
-Functions
-Goldbach's conjecture, a famous unsolved problem in number theory, posits that
-every even integer greater than 2 can be expressed as the sum of two prime numbers.
-'''
-
-def sieve(n):
-    global isprime
-    isprime=[True]*(n+1)
-    isprime[0],isprime[1]=False,False
-    sq=int(pow(n,0.5))
-    for i in range(2,sq+1):
-        if not isprime[i]:
-            continue
-        for j in range(i*i,n+1,i):
-            isprime[j]=False
-
-#For lowest prime factor,use this as it is more fast
-def sieve(n):
-    global isprime,lp
-    isprime,lp=[True]*(n+1),[1]*(n+1)
-    isprime[0],isprime[1]=False,False
-    lp[0],lp[1]=0,0
-    for i in range(2,n+1):
-        if not isprime[i]:
-            continue
-        if lp[i]==1:
-            lp[i]=i
-        for j in range(i*i,n+1,i):
-            if lp[j]==1:
-                lp[j]=i
-            isprime[j]=False
-
-def sieve(n):
-    global isprime,lp,hp
-    isprime,lp,hp=[True]*(n+1),[1]*(n+1),[1]*(n+1)
-    isprime[0],isprime[1]=False,False
-    lp[0],hp[0]=0,0
-    for i in range(2,n+1):
-        if not isprime[i]:
-            continue
-        hp[i]=i
-        if lp[i]==1:
-            lp[i]=i
-        for j in range(2*i,n+1,i):
-            hp[j]=i
-            if lp[j]==1:
-                lp[j]=i
-            isprime[j]=False
-
 #Returns all prime numbers in the range [start>=1,end]
 def range_sieve(start,end):
     #Calculate primes till sqrt(n)
@@ -278,77 +228,6 @@ def range_sieve(start,end):
         for j in range(max(i*i,num+i),end+1,i):
             isprime[j-start]=False
 
-def divisors(n):
-    '''
-    Returns sorted list of divisors of n in O(sqrt(n))
-    '''
-    if n==1:
-        return [1]
-    small_divs=[1]
-    large_divs=[n]
-    i=2
-    while i*i<=n:
-        if not n%i:
-            small_divs.append(i)
-            if i!=n//i:
-                large_divs.append(n//i)
-        i+=1
-    return small_divs+large_divs[::-1]
-
-def prime_factorisation(n):
-    '''
-    Returns a list of tuples where l[i]=(prime,cnt) in O(sqrt(n))
-    '''
-    num=n
-    prime_facs=[]
-    i=2
-    while i*i<=n:
-        cnt=0
-        while not num%i:
-            num//=i
-            cnt+=1
-        if cnt:
-            prime_facs.append((i,cnt))
-        if num==1:
-            break
-        i+=1
-    if num!=1:
-        prime_facs.append((num,1))
-    return prime_facs
-
-def prime_factorisation(n):
-    '''
-    Returns a list of tuples where l[i]=(prime,cnt) in O(log(n))
-    '''
-    num=n
-    prime_facs=[]
-    num=n
-    while num>1:
-        last=lp[num]
-        cnt=0
-        while lp[num]==last:
-            num//=last
-            cnt+=1
-        prime_facs.append((last,cnt))
-    return prime_facs
-
-def divisors(n):
-    '''
-    Returns list of divisors (not sorted) of n in O(no. of divs)
-    '''
-    if n==1:
-        return [1]
-    prime_facs=prime_factorisation(n)
-    divs=[1]
-    for prime,cnt in prime_facs:
-        tot=len(divs)
-        for i in range(tot-1,-1,-1):
-            div=divs[i]
-            for j in range(cnt):
-                div*=prime
-                divs.append(div)
-    return divs
-
 def calculate_sum(n):
     '''
     Returns sum of digits from 1 to n in O(log(n))
@@ -366,28 +245,6 @@ def calculate_sum(n):
         coeff*=10
         nn//=10
     return ans
-
-def isprime(num):
-    if num<=1:
-        return False
-    i=2
-    while i*i<=num:
-        if not num%i:
-            return False
-        i+=1
-    return True
-
-def fraction(num,den):
-    if den==0:
-        return (1,0)
-    elif num==0:
-        return (0,1)
-    else:
-        g=gcd(abs(num),abs(den))
-        num,den=num//g,den//g
-        if den<0:
-            num,den=-num,-den
-        return (num,den)
 
 # Miller-Rabin primality test O((log(n))**3)
 def is_prime(n,k=5):  # number of tests
@@ -419,20 +276,6 @@ def is_prime(n,k=5):  # number of tests
             return False
     return True
 
-def divide(dividend,divisor):
-    quo=[]
-    rem=0
-    for j in dividend:
-        j=int(j)
-        rem*=10
-        rem+=j
-        if quo or rem//divisor:
-            quo.append(str(rem//divisor))
-        rem%=divisor
-    if not quo:
-        quo.append('0')
-    return ''.join(quo),rem
-
 def intersectIntervals(intervals1,intervals2):
     intervals1.sort()
     intervals2.sort()
@@ -448,49 +291,6 @@ def intersectIntervals(intervals1,intervals2):
         else:
             j+=1
     return answer
-
-def optimized_knapsack(arr,max_sum,left=-1,right=-1,bits=16384):
-    '''
-    Returns a dp array where dp[i]<(2**bits)-1
-    Each bit of each element denotes whether the subset sum of 'position of bit' is possible or not
-    Time complexity is max_sum*len(tot)/bits
-    if left and right is given:
-        Returns True if any of the sum between [left,right] is possible else False
-    else:
-        Returns dp array
-    
-    Example:
-    dp=[3,5,9],bits=4
-    bit of dp element->  1 0 1 1    0 1 0 1    1 0 0  1        (1 if summation is possible else 0)
-    position of bit->    0 1 2 3    4 5 6 7    8 9 10 11
-    Takes 3 secs to execute when n*n=4*10**10
-    '''
-    m=(max_sum+1)//bits
-    dp=[0]*(m+1)
-    dp[0]=power[bits-1]
-    if not left==right==-1:
-        start_block,end_block=left//bits,right//bits
-        reqs,reqe=bits-(left%bits),bits-(right%bits+1)
-    for j in arr:
-        j=bits*(m+1)-1-j
-        block=j//bits
-        req=bits-(j%bits+1)
-        for i in range(m,-1,-1):
-            cur=((dp[block-1]&(power[req]-1))*power[bits-req] if block else 0)|(dp[block]//power[req])
-            dp[i]|=cur
-
-            if left==right==-1:
-                pass
-            elif start_block==end_block:
-                if i==start_block and (dp[i]&(power[reqs]-1))//power[reqe]:
-                    return True
-            elif (start_block<i<end_block and dp[i]) or (i==start_block and dp[i]&(power[reqs]-1)) or (i==end_block and dp[i]//power[req]):
-                return True
-            
-            if not block:
-                break
-            block-=1
-    return dp if left==right==-1 else False
 
 '''LCA'''
 class LowestCommonAncestor:
@@ -671,29 +471,6 @@ def exp(n,p):
         n>>=1
     return ans[0][0]
 
-'''Min Spanning Tree'''
-def prims():
-    vis=[0]*(n+1)
-    dist=[float('inf')]*(n+1)
-    h=[]
-    heappush(h,func(0,1,0))
-    dist[1]=0
-    ans=0
-    while h:
-        ele=heappop(h)
-        wt,parent,grand_par=ele>>40,(0xfffff00000&ele)>>20,0xfffff&ele   #0<=wt<inf 0<=x<=10**6 0<=y<=10**6
-        if wt!=dist[parent]:
-            continue
-        ans+=wt
-        '''if parent!=grand_par:
-            edge.append((parent,grand_par))'''  #gives you the edges of min spanning tree
-        vis[parent]=1
-        for child,wt in adj[parent]:
-            if not vis[child] and wt<dist[child]:
-                dist[child]=wt
-                heappush(h,func(wt,child,parent))
-    return ans
-
 '''Mobius Function'''
 def sieve(n):
     global prime,mu
@@ -713,60 +490,9 @@ def sieve(n):
                 prime[num]=0
                 num+=i
 
-'''Mod Functions'''
-#Mod functions
-
-def nCr(n,r,mod=None):
-    if n<r or r<0:
-        return 0
-    r=min(r,n-r)
-    num,den=1,1
-    for i in range(1,r+1):
-        num*=n-i+1
-        den*=i
-        if mod:
-            num%=mod
-            den%=mod
-    return (num*pow(den,-1,mod))%mod if mod else num//den
-
-def nPr(n,r):
-    if n<r or r<0:
-        return 0
-    ans=1
-    for i in range(n-r+1,n+1):
-        ans*=i
-    return ans
-
-def factorial(n):
-    global fact,inv
-    fact=[1]
-    for i in range(1,n+1):
-        fact.append((fact[-1]*i)%mod)
-    inv=[1]*(n+1)
-    inv[n]=pow(fact[-1],-1,mod)
-    for i in range(n-1,0,-1):
-        inv[i]=(inv[i+1]*(i+1))%mod
-
-def nPr(n,r):
-    return fact[n]*inv[n-r]%mod if r>=0 and n>=r else 0
-
-def nCr(n,r):
-    return (fact[n]*(inv[r]*inv[n-r]%mod))%mod if r>=0 and n>=r else 0
-
-#If you have to take mod2, then it also works:
-#Checks if r is a factor of n or not
-def nCr_mod2(n,r):
-    return n&r==r
-
 #Use when n>mod and mod is a composite number
 #prime factorisation of mod=p1*p2*p3*...*pn
 #pass these pi in this function one by one
-
-def factorial(mod):
-    fact=[1]
-    for i in range(1,mod):
-        fact.append((fact[-1]*i)%mod)
-    return fact
 
 def nCr_modp(n,r,mod,fact):
     res=1
@@ -799,50 +525,6 @@ def nCr_mod1_mul_mod2(n,r,mod1,mod2):
             return ans+a
         ans+=mod1
     return 0
-
-'''Nearest element index'''
-#Gives the indices of strictly smaller or greater elements
-def previous_element(l):
-    stks,pse=[],[]
-    stkg,pge=[],[]
-    for i,j in enumerate(l):
-        #For smaller elements
-        while stks and j<=l[stks[-1]]:
-            stks.pop()
-        if stks:
-            pse.append(stks[-1])
-        else:
-            pse.append(-1)
-        stks.append(i)
-        #For larger elements
-        while stkg and l[stkg[-1]]<=j:
-            stkg.pop()
-        if stkg:
-            pge.append(stkg[-1])
-        else:
-            pge.append(-1)
-        stkg.append(i)
-    return pse,pge
-
-def next_element(l):
-    n=len(l)
-    stks,nse=[],[n]*n
-    stkg,nge=[],[n]*n
-    for i in range(n-1,-1,-1):
-        j=l[i]
-        #For smaller elements
-        while stks and j<=l[stks[-1]]:
-            stks.pop()
-        if stks:
-            nse[i]=stks[-1]
-        stks.append(i)
-        #For greater elements
-        while stkg and l[stkg[-1]]<=j:
-            stkg.pop()
-        if stkg:
-            nge[i]=stkg[-1]
-        stkg.append(i)
-    return nse,nge
 
 '''
 NTT
@@ -1043,8 +725,6 @@ def finalize(parentDP,parent,eind):
 #rootDP,forwardDP,reverseDP=rerooter(adj,default,combine,finalize)
 #out(rootDP)
 
-
-
 '''Segment Tree'''
 class SegmentTree:
     
@@ -1179,229 +859,6 @@ class LazySegmentTree:
 
     def __repr__(self):
         return f'SegmentTree([{', '.join(map(str,[self.query(i,i) for i in range(1,self.n+1)]))}])'
-
-
-'''SortedList'''
-class SortedList:
-    
-    def __init__(self, iterable=[], _load=200):
-        """Initialize sorted list instance."""
-        values = sorted(iterable)
-        self._len = _len = len(values)
-        self._load = _load
-        self._lists = _lists = [values[i:i + _load] for i in range(0, _len, _load)]
-        self._list_lens = [len(_list) for _list in _lists]
-        self._mins = [_list[0] for _list in _lists]
-        self._fen_tree = []
-        self._rebuild = True
-        
-    def _fen_build(self):
-        """Build a fenwick tree instance."""
-        self._fen_tree[:] = self._list_lens
-        _fen_tree = self._fen_tree
-        for i in range(len(_fen_tree)):
-            if i | i + 1 < len(_fen_tree):
-                _fen_tree[i | i + 1] += _fen_tree[i]
-        self._rebuild = False
-        
-    def _fen_update(self, index, value):
-        """Update `fen_tree[index] += value`."""
-        if not self._rebuild:
-            _fen_tree = self._fen_tree
-            while index < len(_fen_tree):
-                _fen_tree[index] += value
-                index |= index + 1
-                
-    def _fen_query(self, end):
-        """Return `sum(_fen_tree[:end])`."""
-        if self._rebuild:
-            self._fen_build()
-        _fen_tree = self._fen_tree
-        x = 0
-        while end:
-            x += _fen_tree[end - 1]
-            end &= end - 1
-        return x
-
-    def _fen_findkth(self, k):
-        """Return a pair of (the largest `idx` such that `sum(_fen_tree[:idx]) <= k`, `k - sum(_fen_tree[:idx])`)."""
-        _list_lens = self._list_lens
-        if k < _list_lens[0]:
-            return 0, k
-        if k >= self._len - _list_lens[-1]:
-            return len(_list_lens) - 1, k + _list_lens[-1] - self._len
-        if self._rebuild:
-            self._fen_build()
-        _fen_tree = self._fen_tree
-        idx = -1
-        for d in reversed(range(len(_fen_tree).bit_length())):
-            right_idx = idx + (1 << d)
-            if right_idx < len(_fen_tree) and k >= _fen_tree[right_idx]:
-                idx = right_idx
-                k -= _fen_tree[idx]
-        return idx + 1, k
-    
-    def _delete(self, pos, idx):
-        """Delete value at the given `(pos, idx)`."""
-        _lists = self._lists
-        _mins = self._mins
-        _list_lens = self._list_lens
-        self._len -= 1
-        self._fen_update(pos, -1)
-        del _lists[pos][idx]
-        _list_lens[pos] -= 1
-        if _list_lens[pos]:
-            _mins[pos] = _lists[pos][0]
-        else:
-            del _lists[pos]
-            del _list_lens[pos]
-            del _mins[pos]
-            self._rebuild = True
-            
-    def _loc_left(self, value):
-        """Return an index pair that corresponds to the first position of `value` in the sorted list."""
-        if not self._len:
-            return 0, 0
-        _lists = self._lists
-        _mins = self._mins
-        lo, pos = -1, len(_lists) - 1
-        while lo + 1 < pos:
-            mi = (lo + pos) >> 1
-            if value <= _mins[mi]:
-                pos = mi
-            else:
-                lo = mi
-        if pos and value <= _lists[pos - 1][-1]:
-            pos -= 1
-        _list = _lists[pos]
-        lo, idx = -1, len(_list)
-        while lo + 1 < idx:
-            mi = (lo + idx) >> 1
-            if value <= _list[mi]:
-                idx = mi
-            else:
-                lo = mi
-        return pos, idx
-    
-    def _loc_right(self, value):
-        """Return an index pair that corresponds to the last position of `value` in the sorted list."""
-        if not self._len:
-            return 0, 0
-        _lists = self._lists
-        _mins = self._mins
-        pos, hi = 0, len(_lists)
-        while pos + 1 < hi:
-            mi = (pos + hi) >> 1
-            if value < _mins[mi]:
-                hi = mi
-            else:
-                pos = mi
-        _list = _lists[pos]
-        lo, idx = -1, len(_list)
-        while lo + 1 < idx:
-            mi = (lo + idx) >> 1
-            if value < _list[mi]:
-                idx = mi
-            else:
-                lo = mi
-        return pos, idx
-    
-    def add(self, value):
-        """Add `value` to sorted list."""
-        _load = self._load
-        _lists = self._lists
-        _mins = self._mins
-        _list_lens = self._list_lens
-        self._len += 1
-        if _lists:
-            pos, idx = self._loc_right(value)
-            self._fen_update(pos, 1)
-            _list = _lists[pos]
-            _list.insert(idx, value)
-            _list_lens[pos] += 1
-            _mins[pos] = _list[0]
-            if _load + _load < len(_list):
-                _lists.insert(pos + 1, _list[_load:])
-                _list_lens.insert(pos + 1, len(_list) - _load)
-                _mins.insert(pos + 1, _list[_load])
-                _list_lens[pos] = _load
-                del _list[_load:]
-                self._rebuild = True
-        else:
-            _lists.append([value])
-            _mins.append(value)
-            _list_lens.append(1)
-            self._rebuild = True
-            
-    def discard(self, value):
-        """Remove `value` from sorted list if it is a member."""
-        _lists = self._lists
-        if _lists:
-            pos, idx = self._loc_right(value)
-            if idx and _lists[pos][idx - 1] == value:
-                self._delete(pos, idx - 1)
-                
-    def remove(self, value):
-        """Remove `value` from sorted list; `value` must be a member."""
-        _len = self._len
-        self.discard(value)
-        if _len == self._len:
-            raise ValueError('{0!r} not in list'.format(value))
-        
-    def pop(self, index=-1):
-        """Remove and return value at `index` in sorted list."""
-        pos, idx = self._fen_findkth(self._len + index if index < 0 else index)
-        value = self._lists[pos][idx]
-        self._delete(pos, idx)
-        return value
-    
-    def bisect_left(self, value):
-        """Return the first index to insert `value` in the sorted list."""
-        pos, idx = self._loc_left(value)
-        return self._fen_query(pos) + idx
-    
-    def bisect_right(self, value):
-        """Return the last index to insert `value` in the sorted list."""
-        pos, idx = self._loc_right(value)
-        return self._fen_query(pos) + idx
-    
-    def count(self, value):
-        """Return number of occurrences of `value` in the sorted list."""
-        return self.bisect_right(value) - self.bisect_left(value)
-    
-    def __len__(self):
-        """Return the size of the sorted list."""
-        return self._len
-    
-    def __getitem__(self, index):
-        """Lookup value at `index` in sorted list."""
-        pos, idx = self._fen_findkth(self._len + index if index < 0 else index)
-        return self._lists[pos][idx]
-    
-    def __delitem__(self, index):
-        """Remove value at `index` from sorted list."""
-        pos, idx = self._fen_findkth(self._len + index if index < 0 else index)
-        self._delete(pos, idx)
-        
-    def __contains__(self, value):
-        """Return true if `value` is an element of the sorted list."""
-        _lists = self._lists
-        if _lists:
-            pos, idx = self._loc_left(value)
-            return idx < len(_lists[pos]) and _lists[pos][idx] == value
-        return False
-    
-    def __iter__(self):
-        """Return an iterator over the sorted list."""
-        return (value for _list in self._lists for value in _list)
-    
-    def __reversed__(self):
-        """Return a reverse iterator over the sorted list."""
-        return (value for _list in reversed(self._lists) for value in reversed(_list))
-    
-    def __repr__(self):
-        """Return string representation of sorted list."""
-        return 'SortedList({0})'.format(list(self))
 
 
 '''Square Root Decomposition'''
@@ -1571,178 +1028,6 @@ def kmp(s):
             ma+=1
         pre[i]=ma
     return pre
-
-def longest_common_subsequence_length(s,t):
-    n,m=len(s),len(t)
-    last=[0]*(m+1)
-    for i in range(n):
-        cur=[0]*(m+1)
-        for j in range(m):
-            if s[i]==t[j]:
-                cur[j+1]=last[j]+1
-            else:
-                cur[j+1]=max(cur[j],last[j+1])
-        last=cur
-    return cur[-1]
-
-def longest_common_subsequence(s,t):
-    n,m=len(s),len(t)
-    dp=[[0]*(m+1) for i in range(n+1)]
-    for i in range(n):
-        for j in range(m):
-            if s[i]==t[j]:
-                dp[i+1][j+1]=dp[i][j]+1
-            else:
-                dp[i+1][j+1]=max(dp[i+1][j],dp[i][j+1])
-    i,j=n,m
-    ans=[]
-    while i and j:
-        if s[i-1]==t[j-1]:
-            ans.append(s[i-1])
-            i-=1
-            j-=1
-        else:
-            if dp[i-1][j]>dp[i][j-1]:
-                i-=1
-            else:
-                j-=1
-    return ''.join(ans[::-1])
-
-def longest_increasing_subsequence_length(l)
-    lis=[]
-    for j in l:
-        #For strictly increasing lis, use bisect_left
-        ind=bisect(lis,j)
-        if ind==len(lis):
-            lis.append(j)
-        else:
-            lis[ind]=j
-    return len(lis)
-
-def longest_increasing_subsequence(l):
-    #dp[i] denotes the length of lis (strictly inc.) ending at index i
-    n=len(l)
-    dp=[1]*n
-    for i in range(n):
-        for j in range(i):
-            if l[j]<l[i]:        
-                dp[i]=max(dp[i],dp[j]+1)
-    ma,ind=0,-1
-    for i,j in enumerate(dp):
-        if ma<j:
-            ma=j
-            ind=i
-    lis=[l[ind]]
-    cur=ma-1
-    for i in range(ind-1,-1,-1):
-        if dp[i]==cur and lis[-1]>l[i]:
-            lis.append(l[i])
-            cur-=1
-    return lis[::-1]
-
-def longest_common_substring_length(s,t):
-    n,m=len(s),len(t)
-    last=[0]*(m+1)
-    ans=0
-    for i in range(n):
-        cur=[0]*(m+1)
-        for j in range(m):
-            if s[i]==t[j]:
-                cur[j+1]=last[j]+1
-            else:
-                cur[j+1]=0
-            ans=max(ans,cur[j+1])
-        last=cur
-    return ans
-
-def longest_common_substring(s,t):
-    n,m=len(s),len(t)
-    last=[0]*(m+1)
-    length=0
-    ind=-1
-    for i in range(n):
-        cur=[0]*(m+1)
-        for j in range(m):
-            if s[i]==t[j]:
-                cur[j+1]=last[j]+1
-            else:
-                cur[j+1]=0
-            if length<cur[j+1]:
-                length=cur[j+1]
-                ind=i
-        last=cur
-    ans=[]
-    while length:
-        ans.append(s[ind])
-        ind-=1
-        length-=1
-    return ''.join(ans[::-1])
-
-
-'''Subarray Sum Queries'''
- 
-class Node:
- 
-    def __init__(self,subarr_sum,prefix,suffix,total_sum):
-        self.sub=subarr_sum
-        self.pre=prefix
-        self.suf=suffix
-        self.tot=total_sum
- 
-    def __repr__(self):
-        return f'Node({self.sub}, {self.pre}, {self.suf}, {self.tot})'
- 
-class SegmentTree:
-    
-    def __init__(self,l,merge,default):
-        self.merge=merge
-        self.default=default
-        self.n=1<<len(l).bit_length() if len(l)&(len(l)-1) else len(l)
-        self.seg=[self.default for i in range(2*self.n)]
-        for i in range(self.n,2*self.n):
-            if i-self.n>=len(l):
-                break
-            else:
-                self.seg[i]=l[i-self.n]
-        for i in range(self.n-1,0,-1):
-            self.seg[i]=self.merge(self.seg[2*i],self.seg[2*i+1])
- 
-    #Pass 1 based indexing
-    def update(self,ind,val):
-        ind=ind+self.n-1
-        self.seg[ind]=val
-        while ind>1:
-            ind>>=1
-            self.seg[ind]=self.merge(self.seg[2*ind],self.seg[2*ind+1])
- 
-    #Pass 1 based indexing
-    def query(self,left,right):                  
-        left,right=left+self.n-1,right+self.n-1
- 
-        resL,resR=self.default,self.default    #Default value
-            
-        while left<=right:
-            if left&1:
-                resL=self.merge(resL,self.seg[left])
-                left+=1
-            if not right&1:
-                resR=self.merge(self.seg[right],resR)
-                right-=1
-            left>>=1
-            right>>=1
-        return self.merge(resL,resR)
- 
-    #Pass 1 based indexing
-    def get_element(self,ind):
-        return self.seg[self.n+ind-1]
- 
-def merge(nodeL,nodeR):
-    subarr_sum=max(nodeL.sub,nodeR.sub,nodeL.suf+nodeR.pre)
-    prefix=max(nodeL.pre,nodeL.tot+nodeR.pre if nodeR.pre!=float('-inf') else nodeL.tot)
-    suffix=max(nodeL.suf+nodeR.tot if nodeL.suf!=float('-inf') else nodeR.tot,nodeR.suf)
-    total_sum=nodeL.tot+nodeR.tot if nodeL.tot!=float('-inf') and nodeR.tot!=float('-inf') else max(nodeL.tot,nodeR.tot)
-    return Node(subarr_sum,prefix,suffix,total_sum)
-
  
 '''Tarzan's Algorithm (Bridges in Graph)'''
 vis=[0]*(v+1)
@@ -1763,35 +1048,6 @@ def Tarzan(tin,parent,grand_par=0):
                 bridge.append((parent,child))
         lowest_time[parent]=min(lowest_time[parent],lowest_time[child])
     yield
-
-'''
-Dijkstra's Algorithm
-for 3rd parameter whose no. of bits taken in binary representation is atmost 3
-ele=heappop(h)
-wt,parent,step=ele>>23,(ele&(0xfffff<<3))>>3,ele&((1<<3)-1)
-'''
-'''
-ele=heappop(h)
-wt,x,y=ele>>40,(0xfffff00000&ele)>>20,0xfffff&ele   #Will work for 0<=x<=10**6,0<=y<=10**6
-'''
-def dijkstra(source,dest=-1):
-    #Returns -1 if no path is found
-    func=lambda u,v:u<<20^v
-    h=[]
-    heappush(h,func(0,source))   #0 is weight and source is point from where it starts
-    dist=[float('inf')]*(n+1)
-    dist[source]=0
-    while h:
-        wt,parent=h[0]>>20,heappop(h)&0xfffff
-        if dist[parent]!=wt:
-            continue
-        if parent==dest:
-            return dist[parent]
-        for child,wt in adj[parent]:
-            if dist[child]>dist[parent]+wt:
-                dist[child]=dist[parent]+wt
-                heappush(h,func(dist[child],child))
-    return dist if dest==-1 else -1
 
 '''Trie DS'''
 #For binary strings
